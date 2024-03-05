@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 env:
-  VITE_URL: https:;//api.valantis.store:41000
+  VITE_URL: https://api.valantis.store:41000
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
