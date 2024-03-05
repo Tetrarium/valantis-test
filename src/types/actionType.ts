@@ -1,1 +1,0 @@
-export type ActionType = 'get_ids' | 'get_items' | 'get_fields' | 'filter';

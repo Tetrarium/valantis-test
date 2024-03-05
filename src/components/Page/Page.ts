@@ -1,5 +1,4 @@
-import { Api } from "@/API";
-import { API_PASS, API_URL } from "@/config";
+import { SHOW_LIMIT } from "@/config";
 import { GoodsController } from "@/modules/goods/GoodsController";
 
 export class Page {
@@ -8,12 +7,10 @@ export class Page {
   private root: HTMLElement;
   private pageEl!: HTMLElement;
   private goodsContainer!: HTMLElement;
-  private api: Api;
 
   constructor(root: HTMLElement) {
     this.root = root;
     this.controller = new GoodsController();
-    this.api = new Api(API_URL, API_PASS);
   }
 
   createPageEl(title: string) {
@@ -32,20 +29,13 @@ export class Page {
 
   async renderGoods() {
     this.goodsContainer.innerHTML = 'Loading...';
-    // const goods = await this.controller.getGoods();
-    // console.log(goods);
+    const goods = await this.controller.getGoods(SHOW_LIMIT, 1);
 
-    // this.goodsContainer.innerHTML = goods
-    //   .map(good => this.createGoodEl(good))
-    //   .join(' ');
-    const goods = await this.api.action('get_ids', {
-      offset: 0,
-      limit: 10,
-    })
-      .then(response => this.api.action('get_items', {
-        ids: response!
-      }));
     console.log(goods);
+
+    this.goodsContainer.innerHTML = goods
+      .map(good => this.createGoodEl(good))
+      .join(' ');
   }
 
   private createGoodEl(good: {

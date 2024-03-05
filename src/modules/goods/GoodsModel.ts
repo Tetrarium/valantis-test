@@ -1,8 +1,7 @@
 import { Api } from "@/API";
 import { API_PASS, API_URL } from "@/config";
-import { Model } from "@/types/model";
 
-export class GoodsModel implements Model {
+export class GoodsModel {
   private api: Api;
 
   constructor() {
