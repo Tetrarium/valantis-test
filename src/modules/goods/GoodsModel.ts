@@ -1,123 +1,50 @@
-import { fetchData } from '@/fetch/fetch';
-import { Model } from '@/types/model';
+import { Api } from "@/API";
+import { API_PASS, API_URL } from "@/config";
+import { Model } from "@/types/model";
 
 export class GoodsModel implements Model {
-  private ids: string[];
-  private items: object[];
-  private _offset: number;
-  private _limit: number;
-  private fields: string[];
-  private fieldValues: string[];
+  private api: Api;
 
   constructor() {
-    this.ids = [];
-    this._offset = 0;
-    this._limit = 100;
-    this.items = [];
-    this.fields = [];
-    this.fieldValues = [];
+    this.api = new Api(API_URL, API_PASS);
   }
 
-  get offset(): number {
-    return this._offset;
+  public async getAllIds() {
+    return await this.api.action('get_ids');
   }
 
-  set offset(value: number) {
-    this._offset = value;
-
-    this.fetchIds();
-  }
-
-  get limit(): number {
-    return this._limit;
-  }
-
-  set limit(value: number) {
-    this._limit = value;
-    this.fetchIds();
-  }
-
-  async fetchIds() {
-    const result = await fetchData('get_ids', {
-      offset: this._offset,
-      limit: this._limit,
+  public async getIds(limit: number, offset: number) {
+    return await this.api.action('get_ids', {
+      limit,
+      offset,
     });
-
-    if (result.ok) {
-      // console.log(result.data?.result);
-      const set: Set<string> = new Set(result.data!.result);
-
-      this.ids = [...set];
-      // console.log(this.ids);
-    }
   }
 
-  getIds() {
-    return this.ids;
-  }
-
-  async fetchItems() {
-    const result = await fetchData('get_items', {
-      ids: this.ids
+  public async getItems(ids: string[]) {
+    return await this.api.action('get_items', {
+      ids
     });
-
-    if (result.ok) {
-      const items = result.data!.result;
-      this.items = this.ids.map(item =>
-        items.find((elem: { id: string; }) => elem.id === item));
-    }
   }
 
-  getItems() {
-    return this.items;
+  public async getAvailableFields() {
+    return await this.api.action('get_fields');
   }
 
-  async fetchFields() {
-    const result = await fetchData('get_fields');
-
-    if (result.ok) {
-      console.log(result);
-      this.fields = result.data?.result;
-    } else {
-      // console.log(result.error);
-    }
-  }
-
-  getFields() {
-    return this.fields;
-  }
-
-  getField(index: number) {
-    return this.fields[index];
-  }
-
-  async fetchFieldValues(field: string) {
-    const result = await fetchData('get_fields', {
+  public async getFields(
+    field: string,
+    offset: number,
+    limit: number
+  ) {
+    return await this.api.action('get_fields', {
       field,
-      offset: 0,
-      limit: 10,
+      offset,
+      limit,
     });
-
-    if (result.ok) {
-      this.fieldValues = result.data?.result;
-    } else {
-      console.log(result.error);
-    }
   }
 
-  getFieldValues() {
-    return this.fieldValues;
-  }
-
-  async fetchFilteredIds(field: string, value: string | number) {
-    const result = await fetchData('filter', {
-      [field]: value
+  public async getFiltered(param: string, value: string | number) {
+    return await this.api.action('filter', {
+      [param]: value
     });
-
-    if (result.ok) {
-      this.ids = result.data?.result;
-    } else {
-      console.log(result.error);
-    }
   }
 }
