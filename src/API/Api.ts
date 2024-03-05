@@ -15,6 +15,7 @@ export class Api {
     let limit = 10;
     console.log(limit);
     while ((limit--) > 0) {
+      console.log(limit);
       try {
         const response = await fetch(this._url, {
           method: 'POST',

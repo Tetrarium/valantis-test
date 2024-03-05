@@ -1,3 +1,5 @@
+import "./Page.css";
+
 import { SHOW_LIMIT } from "@/config";
 import { GoodsController } from "@/modules/goods/GoodsController";
 
@@ -20,6 +22,16 @@ export class Page {
     this.pageEl.insertAdjacentHTML('afterbegin', `
       <h1 class="page__header">${title}</h1>
     `);
+
+    const nextButton = this.createButton('next');
+    this.pageEl.appendChild(nextButton);
+  }
+
+  createButton(title: string) {
+    const button = document.createElement('button');
+    button.textContent = title;
+
+    return button;
   }
 
   createGoodsEl() {
@@ -47,7 +59,7 @@ export class Page {
       <div class="good">
         <div class="good__brand">${good.brand || 'No name'}</div>
         <div class="good__name">${good.product}</div>
-        <div calss="good__price">${good.price}</div>
+        <div calss="good__price">Цена: ${good.price}</div>
       </div>
     `;
   }
