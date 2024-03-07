@@ -1,16 +1,17 @@
 import { GoodsModel } from "./GoodsModel";
 
+export interface Meta {
+  currentPage: number;
+  previousPage: number | undefined;
+  nextPage: number | undefined;
+  lastPage?: number;
+}
+
 export class GoodsController {
   private model: GoodsModel;
-  private _hasNextPage: boolean;
 
   constructor() {
     this.model = new GoodsModel;
-    this._hasNextPage = false;
-  }
-
-  public get hasNextPage() {
-    return this._hasNextPage;
   }
 
   private async getNumberAllItems(): Promise<number> {
@@ -25,17 +26,30 @@ export class GoodsController {
     const offset = (page - 1) * limit;
 
     const ids = await this.model.getIds(limit + 1, offset);
-    this._hasNextPage = ids.length > limit;
 
     const items = await this.model.getItems(
       ids
     );
 
-    return [...(new Set(ids))]
+    const lastPage = await this.getNumAllPages(limit);
+
+    const goods = [...(new Set(ids))]
       .map(id =>
         items.find(item =>
           item.id === id))
       .filter(item => item !== undefined)
       .slice(0, limit) as typeof items;
+
+    const previousPage = page > 1 ? page - 1 : undefined;
+    const nextPage = page < lastPage ? page + 1 : undefined;
+
+    const meta: Meta = {
+      currentPage: page,
+      previousPage,
+      nextPage,
+      lastPage,
+    };
+
+    return { goods, meta };
   }
 }

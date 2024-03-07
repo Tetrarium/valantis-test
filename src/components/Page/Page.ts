@@ -1,7 +1,10 @@
 import "./Page.css";
 
 import { SHOW_LIMIT } from "@/config";
-import { GoodsController } from "@/modules/goods/GoodsController";
+import { GoodsController, Meta } from "@/modules/goods/GoodsController";
+
+import Good from "./Good/Good";
+import { ChangePageBtn } from "./UI/Button/Button";
 
 export class Page {
   private controller: GoodsController;
@@ -9,10 +12,17 @@ export class Page {
   private root: HTMLElement;
   private pageEl!: HTMLElement;
   private goodsContainer!: HTMLElement;
+  private pageControl!: HTMLElement;
+
+  private previousButton!: HTMLButtonElement;
+  private nextButton!: HTMLButtonElement;
+  private pageNumEl!: HTMLInputElement;
 
   constructor(root: HTMLElement) {
     this.root = root;
     this.controller = new GoodsController();
+
+    this.handleClickChangePage = this.handleClickChangePage.bind(this);
   }
 
   createPageEl(title: string) {
@@ -23,55 +33,85 @@ export class Page {
       <h1 class="page__header">${title}</h1>
     `);
 
-    const nextButton = this.createButton('next');
-    this.pageEl.appendChild(nextButton);
+    this.root.appendChild(this.pageEl);
+
+    this.createPageControl();
   }
 
-  createButton(title: string) {
-    const button = document.createElement('button');
-    button.textContent = title;
+  createPageControl() {
+    this.pageControl = document.createElement('div');
+    this.pageControl.classList.add('page__control');
 
-    return button;
+    this.previousButton = ChangePageBtn({
+      title: 'Previous Page',
+      onClick: this.handleClickChangePage,
+    });
+
+    this.nextButton = ChangePageBtn({
+      title: 'Next Page',
+      onClick: this.handleClickChangePage,
+    });
+
+    this.pageNumEl = document.createElement('input');
+    this.pageNumEl.type = 'number';
+    this.pageNumEl.classList.add('page__number');
+
+    this.pageControl.appendChild(this.previousButton);
+    this.pageControl.appendChild(this.pageNumEl);
+    this.pageControl.appendChild(this.nextButton);
+    this.pageEl.appendChild(this.pageControl);
+  }
+
+  updatePageControl({ currentPage, previousPage, nextPage, lastPage }: Meta) {
+    const DISABLED = 'disabled';
+    this.nextButton.classList.remove(DISABLED);
+    this.previousButton.classList.remove(DISABLED);
+
+    if (!previousPage) {
+      this.previousButton.classList.add(DISABLED);
+    }
+    if (!nextPage) {
+      this.nextButton.classList.add(DISABLED);
+    }
+
+    this.nextButton.dataset.page = nextPage?.toString();
+    this.previousButton.dataset.page = previousPage?.toString();
+
+    this.pageNumEl.value = currentPage.toString();
+    this.pageNumEl.min = '0';
+    this.pageNumEl.max = String(lastPage);
   }
 
   createGoodsEl() {
     this.goodsContainer = document.createElement('div');
     this.goodsContainer.classList.add('page__goods');
+
+    this.pageEl.appendChild(this.goodsContainer);
   }
 
-  async renderGoods() {
+  async renderGoods(page: number) {
+    this.pageNumEl.textContent = String(page);
+
     this.goodsContainer.innerHTML = 'Loading...';
-    const goods = await this.controller.getGoods(SHOW_LIMIT, 1);
+    const { goods, meta } = await this.controller.getGoods(SHOW_LIMIT, page);
 
-    console.log(goods);
+    console.log(meta);
+    this.updatePageControl(meta);
 
-    this.goodsContainer.innerHTML = goods
-      .map(good => this.createGoodEl(good))
-      .join(' ');
+    this.goodsContainer.innerHTML = '';
+
+    goods.forEach(good => this.goodsContainer.appendChild(
+      Good(good)
+    ));
   }
 
-  private createGoodEl(good: {
-    brand: string | null;
-    price: number;
-    product: string;
-  }) {
-    return `
-      <div class="good">
-        <div class="good__brand">${good.brand || 'No name'}</div>
-        <div class="good__name">${good.product}</div>
-        <div calss="good__price">Цена: ${good.price}</div>
-      </div>
-    `;
+  handleClickChangePage(page: number) {
+    this.renderGoods(page);
   }
-
 
   mount() {
     this.createPageEl('Список товаров');
-    this.root.appendChild(this.pageEl);
-
     this.createGoodsEl();
-    this.pageEl.appendChild(this.goodsContainer);
-
-    this.renderGoods();
+    this.renderGoods(1);
   }
 }

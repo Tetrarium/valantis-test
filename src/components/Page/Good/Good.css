@@ -1,0 +1,18 @@
+
+.good {
+  width: 200px;
+  border: 1px solid gray;
+  margin-bottom: 20px;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 1px 1px 4px 1px gray;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.good__name {
+  text-align: center;
+}
