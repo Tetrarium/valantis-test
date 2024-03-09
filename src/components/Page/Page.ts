@@ -18,11 +18,16 @@ export class Page {
   private nextButton!: HTMLButtonElement;
   private pageNumEl!: HTMLInputElement;
 
+  private debounceTimerId: number | null;
+
   constructor(root: HTMLElement) {
     this.root = root;
     this.controller = new GoodsController();
 
     this.handleClickChangePage = this.handleClickChangePage.bind(this);
+    this.handleChangePage = this.handleChangePage.bind(this);
+
+    this.debounceTimerId = null;
   }
 
   createPageEl(title: string) {
@@ -55,6 +60,7 @@ export class Page {
     this.pageNumEl = document.createElement('input');
     this.pageNumEl.type = 'number';
     this.pageNumEl.classList.add('page__number');
+    this.pageNumEl.addEventListener('change', this.handleChangePage);
 
     this.pageControl.appendChild(this.previousButton);
     this.pageControl.appendChild(this.pageNumEl);
@@ -78,7 +84,7 @@ export class Page {
     this.previousButton.dataset.page = previousPage?.toString();
 
     this.pageNumEl.value = currentPage.toString();
-    this.pageNumEl.min = '0';
+    this.pageNumEl.min = '1';
     this.pageNumEl.max = String(lastPage);
   }
 
@@ -106,7 +112,35 @@ export class Page {
   }
 
   handleClickChangePage(page: number) {
-    this.renderGoods(page);
+
+    this.pageNumEl.value = String(page);
+
+    this.handleChangePage();
+  }
+
+  handleChangePage() {
+
+    let value = Number(this.pageNumEl.value);
+
+    const min = Number(this.pageNumEl.min);
+    const max = Number(this.pageNumEl.max);
+
+    value = value < min
+      ? min
+      : value > max
+        ? max
+        : value;
+
+    this.pageNumEl.value = String(value);
+
+    if (this.debounceTimerId) {
+      clearTimeout(this.debounceTimerId);
+      this.debounceTimerId = null;
+    }
+
+    this.debounceTimerId = setTimeout(() => {
+      this.renderGoods(Number(value));
+    }, 300);
   }
 
   mount() {
