@@ -12,10 +12,10 @@ export class Api {
     action: K,
     ...args: ApiInterface[K]['params']
   ): Promise<ApiInterface[K]['result']> {
+    // Ограничение отправки запросов
+    // чтобы не уйти в бесконечный цикл
     let limit = 10;
-    console.log(limit);
     while ((limit--) > 0) {
-      console.log(limit);
       try {
         const response = await fetch(this._url, {
           method: 'POST',

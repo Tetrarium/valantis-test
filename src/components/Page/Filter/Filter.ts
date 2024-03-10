@@ -1,3 +1,5 @@
+import "./Filter.css";
+
 import { GoodsController } from "@/modules/goods/GoodsController";
 
 import createSelect from "../UI/Select/Select";
@@ -26,7 +28,6 @@ export default class Filter {
     this.element.classList.add('filter');
 
     const options = await this.controller.getFilterByOptions();
-    console.log(options);
 
     createSelect({
       title: 'Фильтровать по: ',
@@ -40,6 +41,8 @@ export default class Filter {
 
   handlerFilterByChange(value: string) {
     console.log(value);
+
+    this.controller.getValuesOfField(value);
   }
 
   mount() {

@@ -1,6 +1,5 @@
 import "./Page.css";
 
-import { SHOW_LIMIT } from "@/config";
 import { GoodsController, Meta } from "@/modules/goods/GoodsController";
 
 import Filter from "./Filter/Filter";
@@ -77,41 +76,6 @@ export class Page {
     this.pageEl.appendChild(this.pageControl);
   }
 
-  // createFilter() {
-  //   const filterEl = document.createElement('div');
-  //   filterEl.classList.add('page__filter');
-
-  //   this.filterByEl = document.createElement('select');
-
-  //   const label = document.createElement('label');
-  //   label.classList.add('filter__label');
-
-  //   const title = document.createElement('span');
-  //   title.textContent = 'Фильтровать по: ';
-  //   label.appendChild(title);
-  //   label.appendChild(this.filterByEl);
-
-  //   filterEl.appendChild(label);
-
-  //   this.controller.getFilterByOptions();
-
-  //   this.pageEl.appendChild(filterEl);
-
-  //   this.renderFilterOptions();
-  // }
-
-  // async renderFilterOptions() {
-  //   const options = await this.controller.getFilterByOptions();
-  //   console.log(options);
-
-  //   this.filterByEl.innerHTML = '';
-  //   options.forEach(option => {
-  //     this.filterByEl.insertAdjacentHTML('beforeend', `
-  //       <option name="${option.name}">${option.title}</option>
-  //     `);
-  //   });
-  // }
-
   updatePageControl({ currentPage, previousPage, nextPage, lastPage }: Meta) {
     const DISABLED = 'disabled';
     this.nextButton.classList.remove(DISABLED);
@@ -143,7 +107,8 @@ export class Page {
     this.pageNumEl.textContent = String(page);
 
     this.goodsContainer.innerHTML = 'Loading...';
-    const { goods, meta } = await this.controller.getGoods(SHOW_LIMIT, page);
+    await this.controller.setPage(page);
+    const { goods, meta } = await this.controller.getGoods();
 
     this.updatePageControl(meta);
 

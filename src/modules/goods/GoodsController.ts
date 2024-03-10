@@ -1,3 +1,5 @@
+import { SHOW_LIMIT } from "@/config";
+
 import { GoodsModel } from "./GoodsModel";
 
 export interface Meta {
@@ -9,42 +11,62 @@ export interface Meta {
 
 export class GoodsController {
   private model: GoodsModel;
+  private _page: number;
+  private _limit: number;
 
   constructor() {
     this.model = new GoodsModel;
+    this._page = 1;
+    this._limit = SHOW_LIMIT;
+  }
+
+  public async setPage(page: number) {
+    if (page < 1) {
+      this._page = 1;
+      return this._page;
+    }
+
+    const maxPage = await this.getNumAllPages();
+    this._page = page > maxPage ? maxPage : page;
+    return this._page;
   }
 
   private async getNumberAllItems(): Promise<number> {
     return (await this.model.getAllIds()).length;
   }
 
-  public async getNumAllPages(limit: number) {
-    return Math.ceil((await this.getNumberAllItems()) / limit);
+  public async getNumAllPages() {
+    return Math.ceil((await this.getNumberAllItems()) / this._limit);
   }
 
-  public async getGoods(limit: number, page: number) {
-    const offset = (page - 1) * limit;
+  public async getGoods() {
+    const offset = getOffset(this._limit, this._page);
 
-    const ids = await this.model.getIds(limit + 1, offset);
+    const ids = await this.model.getIds(this._limit + 1, offset);
 
     const items = await this.model.getItems(
       ids
     );
 
-    const lastPage = await this.getNumAllPages(limit);
+    const lastPage = await this.getNumAllPages();
 
     const goods = [...(new Set(ids))]
       .map(id =>
         items.find(item =>
           item.id === id))
       .filter(item => item !== undefined)
-      .slice(0, limit) as typeof items;
+      .slice(0, this._limit) as typeof items;
 
-    const previousPage = page > 1 ? page - 1 : undefined;
-    const nextPage = page < lastPage ? page + 1 : undefined;
+    const previousPage = this._page > 1
+      ? this._page - 1
+      : undefined;
+
+    const nextPage = this._page < lastPage
+      ? this._page + 1
+      : undefined;
 
     const meta: Meta = {
-      currentPage: page,
+      currentPage: this._page,
       previousPage,
       nextPage,
       lastPage,
@@ -78,4 +100,24 @@ export class GoodsController {
         )
     ];
   }
+
+  public async getValuesOfField(field: string) {
+    const offset = getOffset(this._limit, this._page);
+
+    const values = await this.model.getFields(field, offset, this._limit);
+
+    const sortedValues = [...(new Set(values))].sort((a, b) => {
+      if (typeof a === 'number' && typeof b === 'number') {
+        return a - b;
+      }
+      return a > b ? 1 : -1;
+    });
+
+    console.log(sortedValues);
+    return sortedValues;
+  }
+}
+
+function getOffset(limit: number, page: number) {
+  return (page - 1) * limit;
 }
