@@ -1,3 +1,7 @@
+[![Deploy static content to Pages](https://github.com/Tetrarium/valantis-test/actions/workflows/jekyll-gh-pages.yml/badge.svg)](https://github.com/Tetrarium/valantis-test/actions/workflows/jekyll-gh-pages.yml)
+
+[Ссылка на страницу](https://tetrarium.github.io/valantis-test/)
+
 # Задание
 
 Используя предоставленный апи создать страницу, которая отражает список товаров. Для каждого товара должен отображаться его id, название, цена и бренд.

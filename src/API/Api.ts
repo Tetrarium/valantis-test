@@ -25,6 +25,9 @@ export class Api {
           },
           body: JSON.stringify({ action, params: args[0] })
         });
+        if (response.status !== 200) {
+          throw new Error(response.statusText);
+        }
         const data = await response.json();
         return (data as ApiInterface[K]).result;
       } catch (err) {
