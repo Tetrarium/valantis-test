@@ -18,8 +18,6 @@ export class Page {
   private nextButton!: HTMLButtonElement;
   private pageNumEl!: HTMLInputElement;
 
-  // private filterByEl!: HTMLSelectElement;
-
   private filter!: Filter;
 
   private debounceTimerId: number | null;
@@ -30,6 +28,8 @@ export class Page {
 
     this.handleClickChangePage = this.handleClickChangePage.bind(this);
     this.handleChangePage = this.handleChangePage.bind(this);
+    this.renderFilteredGoods = this.renderFilteredGoods.bind(this);
+    this.renderGoods = this.renderGoods.bind(this);
 
     this.debounceTimerId = null;
   }
@@ -45,9 +45,13 @@ export class Page {
     this.root.appendChild(this.pageEl);
 
     this.createPageControl();
-    this.filter = new Filter(this.pageEl, this.controller);
+    this.filter = new Filter(
+      this.pageEl,
+      this.controller,
+      this.renderFilteredGoods,
+      this.renderGoods,
+    );
     this.filter.mount();
-    // this.createFilter();
   }
 
   createPageControl() {
@@ -103,7 +107,8 @@ export class Page {
     this.pageEl.appendChild(this.goodsContainer);
   }
 
-  async renderGoods(page: number) {
+  async renderGoods() {
+    const page = this.controller.getPage();
     this.pageNumEl.textContent = String(page);
 
     this.goodsContainer.innerHTML = 'Loading...';
@@ -119,13 +124,26 @@ export class Page {
     ));
   }
 
+  async renderFilteredGoods(param: string, value: string | number) {
+    console.log(this);
+    this.goodsContainer.innerHTML = 'Loading...';
+
+    const goods = await this.controller.getFilteredGoods(param, value);
+
+    this.goodsContainer.innerHTML = '';
+
+    goods.forEach(good => this.goodsContainer.appendChild(
+      Good(good)
+    ));
+  }
+
   handleClickChangePage(page: number) {
     this.pageNumEl.value = String(page);
 
     this.handleChangePage();
   }
 
-  handleChangePage() {
+  async handleChangePage() {
 
     let value = Number(this.pageNumEl.value);
 
@@ -138,7 +156,8 @@ export class Page {
         ? max
         : value;
 
-    this.pageNumEl.value = String(value);
+    this.pageNumEl.value = String(await this.controller.setPage(value));
+    this.filter.setDefault();
 
     if (this.debounceTimerId) {
       clearTimeout(this.debounceTimerId);
@@ -146,13 +165,13 @@ export class Page {
     }
 
     this.debounceTimerId = setTimeout(() => {
-      this.renderGoods(Number(value));
+      this.renderGoods();
     }, 300);
   }
 
   mount() {
     this.createPageEl('Список товаров');
     this.createGoodsEl();
-    this.renderGoods(1);
+    this.renderGoods();
   }
 }

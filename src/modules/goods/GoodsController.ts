@@ -31,6 +31,10 @@ export class GoodsController {
     return this._page;
   }
 
+  public getPage() {
+    return this._page;
+  }
+
   private async getNumberAllItems(): Promise<number> {
     return (await this.model.getAllIds()).length;
   }
@@ -115,6 +119,13 @@ export class GoodsController {
 
     console.log(sortedValues);
     return sortedValues;
+  }
+
+  public async getFilteredGoods(param: string, value: string | number) {
+    const ids = await this.model.getFiltered(param, value);
+    const goods = await this.model.getItems(ids);
+
+    return goods;
   }
 }
 

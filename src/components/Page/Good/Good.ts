@@ -9,6 +9,7 @@ interface Props {
 
 export default function Good({
   brand,
+  id,
   price,
   product,
 }: Props): HTMLDivElement {
@@ -17,6 +18,7 @@ export default function Good({
 
   good.innerHTML = `
     <div class="good__brand">${brand || 'No name'}</div>
+    <div class="good__id">${id}</div>
     <div class="good__name">${product}</div>
     <div calss="good__price">Цена: ${price}</div>
   `;
