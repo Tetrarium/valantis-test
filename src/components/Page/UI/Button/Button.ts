@@ -10,12 +10,10 @@ export function ChangePageBtn({ title, onClick }: Props) {
   button.classList.add('button');
   button.textContent = title;
 
-  console.log(onClick);
-
   if (onClick) {
     button.addEventListener('click', (evt) => {
       evt.preventDefault();
-      console.log('click');
+
       onClick(Number(button.dataset.page!));
     });
   }

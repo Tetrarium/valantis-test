@@ -3,6 +3,7 @@ import "./Page.css";
 import { SHOW_LIMIT } from "@/config";
 import { GoodsController, Meta } from "@/modules/goods/GoodsController";
 
+import Filter from "./Filter/Filter";
 import Good from "./Good/Good";
 import { ChangePageBtn } from "./UI/Button/Button";
 
@@ -17,6 +18,10 @@ export class Page {
   private previousButton!: HTMLButtonElement;
   private nextButton!: HTMLButtonElement;
   private pageNumEl!: HTMLInputElement;
+
+  // private filterByEl!: HTMLSelectElement;
+
+  private filter!: Filter;
 
   private debounceTimerId: number | null;
 
@@ -41,6 +46,9 @@ export class Page {
     this.root.appendChild(this.pageEl);
 
     this.createPageControl();
+    this.filter = new Filter(this.pageEl, this.controller);
+    this.filter.mount();
+    // this.createFilter();
   }
 
   createPageControl() {
@@ -65,8 +73,44 @@ export class Page {
     this.pageControl.appendChild(this.previousButton);
     this.pageControl.appendChild(this.pageNumEl);
     this.pageControl.appendChild(this.nextButton);
+
     this.pageEl.appendChild(this.pageControl);
   }
+
+  // createFilter() {
+  //   const filterEl = document.createElement('div');
+  //   filterEl.classList.add('page__filter');
+
+  //   this.filterByEl = document.createElement('select');
+
+  //   const label = document.createElement('label');
+  //   label.classList.add('filter__label');
+
+  //   const title = document.createElement('span');
+  //   title.textContent = 'Фильтровать по: ';
+  //   label.appendChild(title);
+  //   label.appendChild(this.filterByEl);
+
+  //   filterEl.appendChild(label);
+
+  //   this.controller.getFilterByOptions();
+
+  //   this.pageEl.appendChild(filterEl);
+
+  //   this.renderFilterOptions();
+  // }
+
+  // async renderFilterOptions() {
+  //   const options = await this.controller.getFilterByOptions();
+  //   console.log(options);
+
+  //   this.filterByEl.innerHTML = '';
+  //   options.forEach(option => {
+  //     this.filterByEl.insertAdjacentHTML('beforeend', `
+  //       <option name="${option.name}">${option.title}</option>
+  //     `);
+  //   });
+  // }
 
   updatePageControl({ currentPage, previousPage, nextPage, lastPage }: Meta) {
     const DISABLED = 'disabled';
@@ -101,7 +145,6 @@ export class Page {
     this.goodsContainer.innerHTML = 'Loading...';
     const { goods, meta } = await this.controller.getGoods(SHOW_LIMIT, page);
 
-    console.log(meta);
     this.updatePageControl(meta);
 
     this.goodsContainer.innerHTML = '';
@@ -112,7 +155,6 @@ export class Page {
   }
 
   handleClickChangePage(page: number) {
-
     this.pageNumEl.value = String(page);
 
     this.handleChangePage();

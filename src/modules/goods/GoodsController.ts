@@ -52,4 +52,30 @@ export class GoodsController {
 
     return { goods, meta };
   }
+
+  public async getFilterByOptions(): Promise<{ name: string, title: string; }[]> {
+    const filterByOptions = (await this.model.getAvailableFields()) as string[];
+
+    const filterByMap = {
+      'default': 'Без фильтрации',
+      'brand': 'Бренд',
+      'product': 'Название',
+      'price': 'Цена'
+    };
+
+    return [
+      {
+        name: 'default',
+        title: filterByMap.default,
+      }
+      ,
+      ...filterByOptions
+        .map(option =>
+        ({
+          name: option,
+          title: filterByMap[option as keyof typeof filterByMap]
+        })
+        )
+    ];
+  }
 }
